@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happiest Birthday Patee!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+  body, html {
+    margin: 0; padding: 0;
+    height: 100%;
+    font-family: 'Poppins', sans-serif;
+    background: #1e1e2f;
+    overflow-x: hidden;
+    color: #fff;
+  }
+
+  /* 5-Second Countdown overlay */
+  #countdown-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, #f94144, #f3722c, #ffca3a);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+    z-index: 9999;
+    animation: countdownPulse 1s ease-in-out infinite;
+  }
+
+  #countdown-overlay h2 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 20px #fff;
+  }
+
+  #countdown-timer {
+    font-size: 6rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 8px;
+    background: rgba(255,255,255,0.2);
+    padding: 20px 40px;
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(255,255,255,0.5);
+  }
+
+  @keyframes countdownPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  /* Confetti animation */
+  .confetti {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 20px;
+    background-color: #f9c74f;
+    opacity: 0.9;
+    border-radius: 3px;
+    animation: fall linear infinite;
+  }
+
+  @keyframes fall {
+    0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* Main content - hidden initially */
+  .main-content {
+    display: none;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+
+  .main-content.show {
+    display: block;
+    opacity: 1;
+  }
+
+  header {
+    text-align: center;
+    padding: 2rem 1rem 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  header h1 {
+    font-size: 3.6rem;
+    font-weight: 700;
+    color: #ffca3a;
+    text-shadow: 0 0 5px #ffca3a, 0 0 20px #f48c06;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { text-shadow: 0 0 10px #ffca3a, 0 0 30px #f48c06; }
+    50% { text-shadow: 0 0 30px #ffca3a, 0 0 60px #f48c06; }
+  }
+
+  #friend-pic {
+    display: block;
+    margin: 1.5rem auto;
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    box-shadow: 0 0 15px #ffca3a, 0 0 30px #f48c06;
+    object-fit: cover;
+    border: 6px solid #ffc300;
+    transition: transform 0.3s ease;
+    animation: photoFloat 3s ease-in-out infinite;
+  }
+
+  @keyframes photoFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  #friend-pic:hover {
+    transform: scale(1.05) rotate(5deg);
+    box-shadow: 0 0 30px #f94144, 0 0 50px #f3722c;
+  }
+
+  .btn-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+  }
+
+  button {
+    background: linear-gradient(45deg, #f94144, #f3722c);
+    border: none;
+    border-radius: 30px;
+    padding: 13px 35px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(249, 65, 68, 0.6);
+    transition: all 0.3s ease;
+  }
+
+  button:hover {
+    background: linear-gradient(45deg, #f3722c, #f94144);
+    transform: scale(1.1) translateY(-3px);
+    box-shadow: 0 12px 25px rgba(243, 114, 44, 0.8);
+  }
+
+  #content-area {
+    max-width: 700px;
+    margin: 0 auto 20px;
+    min-height: 100px;
+    background: rgba(249, 65, 68, 0.15);
+    border-radius: 20px;
+    padding: 25px 30px;
+    box-shadow: 0 0 20px #f94144, inset 0 0 15px #f3722c;
+    font-size: 1.3rem;
+    line-height: 1.8rem;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  #content-area.visible {
+    opacity: 1;
+  }
+
+  /* FIXED Memories Photo Gallery - Always Visible Grid */
+  #photo-gallery {
+    display: none;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    max-width: 900px;
+    margin: 0 auto 30px;
+    padding: 0 20px;
+  }
+
+  #photo-gallery.show {
+    display: grid;
+  }
+
+  .memory-photo {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(249, 65, 68, 0.7);
+    transition: all 0.4s ease;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .memory-photo:hover {
+    transform: scale(1.05) rotate(1deg);
+    box-shadow: 0 20px 50px rgba(255, 202, 58, 0.9);
+    border-color: #ffca3a;
+  }
+
+  /* Surprise gift box */
+  #surprise-gift {
+    margin: 30px auto;
+    width: 120px;
+    height: 120px;
+    perspective: 800px;
+    cursor: pointer;
+  }
+
+  .box {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 1s;
+  }
+
+  .box.open {
+    transform: rotateX(-120deg) translateY(-60px);
+  }
+
+  .box-top {
+    background: linear-gradient(45deg, #f94144, #f3722c);
+    height: 40px;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 4px 10px #f3722c;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    transform-origin: bottom center;
+    backface-visibility: hidden;
+  }
+
+  .box-bottom {
+    background: linear-gradient(45deg, #ffca3a, #f9d976);
+    height: 80px;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 4px 20px #d9822b;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    backface-visibility: hidden;
+  }
+
+  .ribbon {
+    position: absolute;
+    width: 20px;
+    height: 100px;
+    background: #f94144;
+    left: 50%;
+    top: 10px;
+    margin-left: -10px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px #f94144;
+    z-index: 2;
+  }
+
+  .ribbon-horizontal {
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    margin-left: -60px;
+    width: 120px;
+    height: 20px;
+    background: #f94144;
+    border-radius: 12px;
+    box-shadow: 0 0 15px #f94144;
+    z-index: 2;
+  }
+
+  .sparkle {
+    position: absolute;
+    top: -10px;
+    left: calc(50% - 15px);
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle at center, #fff, rgba(255, 255, 255, 0));
+    animation: sparkleAnim 2s infinite ease-in-out;
+    border-radius: 50%;
+    box-shadow: 0 0 10px 3px #fff;
+  }
+
+  @keyframes sparkleAnim {
+    0%, 100% { opacity: 1; transform: scale(1) rotate(0); }
+    50% { opacity: 0; transform: scale(1.4) rotate(45deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- 5-Second Countdown Overlay -->
+<div id="countdown-overlay">
+  <h2>🎉 Get Ready! 🎉</h2>
+  <div id="countdown-timer">05</div>
+</div>
+
+<!-- Main Content -->
+<div class="confetti" id="confetti-container"></div>
+
+<div class="main-content" id="main-content">
+  <header>
+    <h1>Happiest Birthday Patudee! 🎉</h1>
+    <img id="friend-pic" src="WhatsApp Image 2025-11-27 at 8.20.16 PM.jpeg" alt="Friend's Photo" />
+  </header>
+
+  <div class="btn-container">
+    <button onclick="showMessage()">Birthday Message</button>
+    <button onclick="showPhotos()">Our Memories</button>
+    <button onclick="toggleGift()">Your Surprise</button>
+  </div>
+
+  <div id="content-area"></div>
+  
+  <!-- Memories Photo Gallery -->
+  <div id="photo-gallery">
+    <!-- Photos will be inserted here by JavaScript -->
+  </div>
+
+  <div id="surprise-gift">
+    <div class="box" id="box">
+      <div class="box-top">
+        <div class="sparkle"></div>
+        <div class="ribbon"></div>
+        <div class="ribbon ribbon-horizontal"></div>
+      </div>
+      <div class="box-bottom"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 5-Second Countdown Timer
+  let countdownTime = 5;
+  const countdownDisplay = document.getElementById('countdown-timer');
+  const countdownOverlay = document.getElementById('countdown-overlay');
+  const mainContent = document.getElementById('main-content');
+
+  const countdownInterval = setInterval(() => {
+    countdownTime--;
+    countdownDisplay.textContent = countdownTime.toString().padStart(2, '0');
+    
+    if (countdownTime <= 0) {
+      clearInterval(countdownInterval);
+      countdownOverlay.style.display = 'none';
+      mainContent.classList.add('show');
+      setTimeout(createConfetti, 500);
+    }
+  }, 1000);
+
+  // Confetti generation
+  const confettiContainer = document.getElementById('confetti-container');
+  const colors = ['#ffca3a', '#f94144', '#f3722c', '#f9d976'];
+  function createConfetti() {
+    for(let i = 0; i < 150; i++) {
+      const confetti = document.createElement('div');
+      confetti.classList.add('confetti-piece');
+      confetti.style.left = Math.random() * 100 + 'vw';
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      confetti.style.animationDelay = (Math.random() * 5) + 's';
+      confetti.style.width = Math.random() * 8 + 5 + 'px';
+      confetti.style.height = Math.random() * 15 + 10 + 'px';
+      confettiContainer.appendChild(confetti);
+    }
+  }
+
+  // Memories Photos Array - REPLACE WITH YOUR ACTUAL PHOTO FILENAMES
+  const memoriesPhotos = [
+    'IMG20250313165642.jpg',
+    'IMG20250130145335.jpg', 
+    'Snapchat-210242479.jpg',
+    'Snapchat-1423414775.jpg',
+    'IMG20250327125221.jpg',
+    'IMG20250312122358.jpg',
+    'IMG20250313165219.jpg'
+  ];
+
+  // Main content functions
+  const contentArea = document.getElementById('content-area');
+  const photoGallery = document.getElementById('photo-gallery');
+  const box = document.getElementById('box');
+  let giftOpen = false;
+
+  function fadeInContent() {
+    contentArea.classList.add('visible');
+  }
+
+  function fadeOutContent() {
+    contentArea.classList.remove('visible');
+    photoGallery.classList.remove('show');
+  }
+
+  function showMessage() {
+    fadeOutContent();
+    setTimeout(() => {
+      contentArea.innerHTML = `✨ Happy Birthday to my Cutiee, my secret keeper, and unpaid therapist❤️. I honestly don’t even know where to start, because you mean so much to me. Life would honestly be so boring without our nonsense talks and stupid jokes. Thank you for always tolerating me when I’m annoying (which is most of the time). From our random talks to our crazy laughs and even our stupid fights, every moment with you is special for me. You’ve always been there for me in ways you don’t even realize, and I’m really grateful to have you in my life. You’re not just my best friend, you’re family to me. I wish you all the happiness, success, love, and everything beautiful that you truly deserve. May your smile always stay the same and your dreams come true. No matter what happens, I’ll always be there for you, just like you’ve been for me. Love you always 🤍✨ 🎉💖`;
+      fadeInContent();
+    }, 300);
+    closeGiftBox();
+  }
+
+  function showPhotos() {
+    fadeOutContent();
+    
+    // Pre-populate gallery with all photos
+    photoGallery.innerHTML = '';
+    memoriesPhotos.forEach((photoSrc, index) => {
+      const img = document.createElement('img');
+      img.src = photoSrc;
+      img.alt = `Memory ${index + 1}`;
+      img.className = 'memory-photo';
+      photoGallery.appendChild(img);
+    });
+    
+    setTimeout(() => {
+      contentArea.textContent = '💕 Our Beautiful Memories Together 💕';
+      photoGallery.classList.add('show');
+      fadeInContent();
+    }, 300);
+    
+    closeGiftBox();
+  }
+
+  function toggleGift() {
+    fadeOutContent();
+    photoGallery.classList.remove('show');
+    if (!giftOpen) {
+      box.classList.add('open');
+      setTimeout(() => {
+        contentArea.textContent = '🎁 Surprise! Wishing you a year filled with delightful surprises and endless happiness!';
+        fadeInContent();
+      }, 1000);
+    } else {
+      box.classList.remove('open');
+      setTimeout(() => {
+        contentArea.textContent = '';
+        fadeOutContent();
+      }, 300);
+    }
+    giftOpen = !giftOpen;
+  }
+
+  function closeGiftBox() {
+    if (giftOpen) {
+      box.classList.remove('open');
+      giftOpen = false;
+    }
+  }
+</script>
+</body>
+</html>
